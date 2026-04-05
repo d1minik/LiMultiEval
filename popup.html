@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>LiMultiEval</title>
+  <style>
+    :root {
+      --bg-main: #1e1b18;
+      --bg-panel: #2b2825;
+      --accent: #cf8b3f;
+      --accent-hover: #e29f53;
+      --text-main: #dbd8d5;
+      --text-muted: #959390;
+      --border: #403d39;
+      --subgroup-bg: rgba(70, 70, 70, 0.18);
+      --subgroup-border: rgba(138, 138, 138, 0.28);
+      --detail-bg: rgba(18, 18, 18, 0.3);
+      --detail-border: rgba(255, 255, 255, 0.08);
+      --disabled-opacity: 0.48;
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      padding: 16px;
+      width: 400px;
+      margin: 0;
+      background: var(--bg-main);
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin: 0 0 16px;
+      text-align: center;
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .tab-nav {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .tab-btn {
+      background: #1a1816;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      color: var(--text-main);
+      border-color: var(--accent);
+      background: #2f2620;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .group {
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--bg-panel);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .group-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+    }
+
+    .subgroup {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      background: var(--subgroup-bg);
+      border-color: var(--subgroup-border);
+    }
+
+    .subgroup:last-child {
+      margin-bottom: 0;
+    }
+
+    .subgroup-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #e3c39a;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    .setting-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .setting-row.stacked {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+    }
+
+    .setting-row.is-disabled {
+      opacity: var(--disabled-opacity);
+    }
+
+    .setting-row.is-disabled .setting-label {
+      color: var(--text-muted);
+    }
+
+    .setting-label {
+      flex: 1;
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 34px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #555;
+      transition: 0.3s;
+      border-radius: 18px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(16px);
+    }
+
+    input[type="color"] {
+      width: 44px;
+      height: 26px;
+      padding: 0;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: transparent;
+      flex-shrink: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+
+    select, input[type="text"], textarea {
+      background: #1a1816;
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 6px;
+      font-size: 12px;
+      outline: none;
+      width: 120px;
+    }
+
+    select:focus, input[type="text"]:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+      box-sizing: border-box;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      line-height: 1.45;
+    }
+
+    .range-wrap {
+      display: flex;
+      align-items: center;
+      width: 160px;
+      flex-shrink: 0;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      margin: 0;
+      height: 4px;
+      background: #1a1816;
+      border-radius: 2px;
+      -webkit-appearance: none;
+      outline: none;
+      border: 1px solid var(--border);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      transition: background 0.2s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: var(--accent-hover);
+    }
+
+    .range-val {
+      width: 40px;
+      text-align: right;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-left: 6px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .action-btn {
+      background: #1a1816;
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .action-btn:hover {
+      border-color: var(--accent);
+      background: #2f2620;
+    }
+
+    .action-btn.is-danger:hover {
+      border-color: #d76f59;
+      background: #36211d;
+    }
+
+    .popup-footer {
+      margin: 8px 0 2px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .popup-footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .popup-footer a:hover {
+      color: var(--accent-hover);
+    }
+
+    .control-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .wide-control {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .inline-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .text-grow {
+      flex: 1;
+      min-width: 0;
+      width: auto !important;
+    }
+
+    .helper-text,
+    .status-line,
+    .empty-state {
+      font-size: 11px;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+
+    .status-line {
+      min-height: 16px;
+      margin-top: 8px;
+    }
+
+    .status-line.is-error {
+      color: #e29184;
+    }
+
+    .status-line.is-success {
+      color: #9fc77a;
+    }
+
+    .small-btn {
+      padding: 6px 10px;
+      font-size: 11px;
+    }
+
+    .replacement-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .replacement-item {
+      border: 1px solid var(--detail-border);
+      background: var(--detail-bg);
+      border-radius: 6px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .replacement-inputs {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .replacement-inputs input {
+      width: 100% !important;
+      box-sizing: border-box;
+    }
+
+    .replacement-row-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+  </style>
+</head>
+<body>
+  <h2>LiMultiEval</h2>
+
+  <div class="tab-nav" role="tablist" aria-label="LiMultiEval Settings Tabs">
+    <button type="button" class="tab-btn active" data-tab-target="layoutTab" aria-selected="true">Cinema Layout</button>
+    <button type="button" class="tab-btn" data-tab-target="designTab" aria-selected="false">Design Tweaks</button>
+    <button type="button" class="tab-btn" data-tab-target="namesTab" aria-selected="false">Names</button>
+  </div>
+
+  <div class="group tab-panel active" data-tab-panel="layoutTab">
+    <div class="group-title">Cinema Layout</div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Activation</div>
+      <div class="setting-row">
+        <span class="setting-label">Enable extension</span>
+        <label class="switch"><input type="checkbox" id="enabled" checked><span class="slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Only Show Playing Boards</span>
+        <label class="switch"><input type="checkbox" id="onlyPlaying" checked><span class="slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Show Evalbar Text</span>
+        <label class="switch"><input type="checkbox" id="showEvalText" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Grid & Spacing</div>
+      <div class="setting-row">
+        <span class="setting-label">Boards Per Row</span>
+        <div class="range-wrap">
+          <input type="range" id="cardsPerRow" min="1" max="12" value="4">
+          <span class="range-val" id="cardsPerRowVal">4</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Card Width (%)</span>
+        <div class="range-wrap">
+          <input type="range" id="cardWidthScale" min="50" max="200" value="100">
+          <span class="range-val" id="cardWidthScaleVal">100</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Viewport Padding</span>
+        <div class="range-wrap">
+          <input type="range" id="viewportPadding" min="0" max="40" value="14">
+          <span class="range-val" id="viewportPaddingVal">14</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Grid Gap</span>
+        <div class="range-wrap">
+          <input type="range" id="gridGap" min="0" max="32" value="22">
+          <span class="range-val" id="gridGapVal">22</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Player Row Gap</span>
+        <div class="range-wrap">
+          <input type="range" id="playerRowGap" min="0" max="24" value="9">
+          <span class="range-val" id="playerRowGapVal">9</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group tab-panel" data-tab-panel="designTab">
+    <div class="group-title">Design Tweaks</div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Typography & Dimensions</div>
+      <div class="setting-row stacked">
+        <span class="setting-label">Global Font</span>
+        <div class="control-stack">
+          <select id="globalFont" class="wide-control">
+            <option value="">Default (Lichess)</option>
+            <option value="Noto Sans">Noto Sans</option>
+            <option value="Roboto">Roboto</option>
+            <option value="System UI">System UI</option>
+            <option value="Arial">Arial</option>
+            <option value="Verdana">Verdana</option>
+            <option value="Trebuchet MS">Trebuchet MS</option>
+            <option value="Tahoma">Tahoma</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Courier New">Courier New</option>
+          </select>
+          <div class="inline-actions">
+            <input type="text" id="customGlobalFont" class="text-grow" placeholder="Custom font or font stack">
+            <button type="button" class="action-btn small-btn" id="saveCustomGlobalFont">Use</button>
+          </div>
+          <div class="helper-text">Typed custom fonts are saved and then also appear in the dropdown.</div>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Hide Flags</span>
+        <label class="switch"><input type="checkbox" id="hideFlags" checked><span class="slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Hide Titles</span>
+        <label class="switch"><input type="checkbox" id="hideTitle" checked><span class="slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Flag Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="flagOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="flagOpacityVal">100</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Name Scale</span>
+        <div class="range-wrap">
+          <input type="range" id="nameScale" min="60" max="180" value="127">
+          <span class="range-val" id="nameScaleVal">127</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Eval Text Scale</span>
+        <div class="range-wrap">
+          <input type="range" id="evalTextScale" min="60" max="180" value="90">
+          <span class="range-val" id="evalTextScaleVal">90</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Clock Scale</span>
+        <div class="range-wrap">
+          <input type="range" id="clockScale" min="60" max="180" value="120">
+          <span class="range-val" id="clockScaleVal">120</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Last Move Scale</span>
+        <div class="range-wrap">
+          <input type="range" id="lastMoveScale" min="60" max="180" value="105">
+          <span class="range-val" id="lastMoveScaleVal">105</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Eval Bar / Clock Height</span>
+        <div class="range-wrap">
+          <input type="range" id="evalBarWidth" min="2" max="40" value="22">
+          <span class="range-val" id="evalBarWidthVal">22</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Eval Text Gap</span>
+        <div class="range-wrap">
+          <input type="range" id="evalTextGap" min="0" max="24" value="0">
+          <span class="range-val" id="evalTextGapVal">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Title</div>
+      <div class="setting-row">
+        <span class="setting-label">Boldness</span>
+        <select id="titleBoldness">
+          <option value="normal">Normal</option>
+          <option value="bold" selected>Bold</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Text Color</span>
+        <input type="color" id="titleColor" value="#e69900">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Text Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="titleOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="titleOpacityVal">100</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Player: White</div>
+      <div class="setting-row">
+        <span class="setting-label">Boldness</span>
+        <select id="whiteNameBoldness">
+          <option value="normal">Normal</option>
+          <option value="bold" selected>Bold</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Text Color</span>
+        <input type="color" id="whiteNameColor" value="#000000">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Text Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="whiteNameOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="whiteNameOpacityVal">100</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Background Box Color</span>
+        <input type="color" id="whiteBoxColor" value="#ffffff">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Background Box Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="whiteBoxOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="whiteBoxOpacityVal">100</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Player: Black</div>
+      <div class="setting-row">
+        <span class="setting-label">Boldness</span>
+        <select id="blackNameBoldness">
+          <option value="normal">Normal</option>
+          <option value="bold" selected>Bold</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Text Color</span>
+        <input type="color" id="blackNameColor" value="#ffffff">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Text Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="blackNameOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="blackNameOpacityVal">100</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Background Box Color</span>
+        <input type="color" id="blackBoxColor" value="#000000">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Background Box Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="blackBoxOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="blackBoxOpacityVal">100</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">White Clock</div>
+      <div class="setting-row">
+        <span class="setting-label">Boldness</span>
+        <select id="whiteClockBoldness">
+          <option value="normal">Normal</option>
+          <option value="bold" selected>Bold</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Text Color</span>
+        <input type="color" id="whiteClockColor" value="#ffffff">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Text Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="whiteClockOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="whiteClockOpacityVal">100</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Background Box Color</span>
+        <input type="color" id="whiteClockBgColor" value="#333333">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Background Box Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="whiteClockBgOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="whiteClockBgOpacityVal">100</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Black Clock</div>
+      <div class="setting-row">
+        <span class="setting-label">Boldness</span>
+        <select id="blackClockBoldness">
+          <option value="normal">Normal</option>
+          <option value="bold" selected>Bold</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Text Color</span>
+        <input type="color" id="blackClockColor" value="#ffffff">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Text Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="blackClockOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="blackClockOpacityVal">100</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Background Box Color</span>
+        <input type="color" id="blackClockBgColor" value="#333333">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Background Box Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="blackClockBgOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="blackClockBgOpacityVal">100</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Current Move</div>
+      <div class="setting-row">
+        <span class="setting-label">Text Color</span>
+        <input type="color" id="lastMoveColor" value="#d1d1d1">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Text Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="lastMoveOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="lastMoveOpacityVal">100</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Background Box Color</span>
+        <input type="color" id="lastMoveBgColor" value="#424242">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Background Box Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="lastMoveBgOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="lastMoveBgOpacityVal">100</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Eval Text</div>
+      <div class="setting-row">
+        <span class="setting-label">Text Color</span>
+        <input type="color" id="evalTextColor" value="#ffffff">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Text Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="evalTextOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="evalTextOpacityVal">100</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Background Box Color</span>
+        <input type="color" id="evalTextBgColor" value="#2a2a2a">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Background Box Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="evalTextBgOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="evalTextBgOpacityVal">100</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Eval Bar Border</div>
+      <div class="setting-row">
+        <span class="setting-label">Width</span>
+        <div class="range-wrap">
+          <input type="range" id="evalBarBorderWidth" min="0" max="6" value="0">
+          <span class="range-val" id="evalBarBorderWidthVal">0</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Color</span>
+        <input type="color" id="evalBarBorderColor" value="#ffffff">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="evalBarBorderOpacity" min="0" max="100" value="18">
+          <span class="range-val" id="evalBarBorderOpacityVal">18</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Game Results (End of Game)</div>
+      <div class="setting-row">
+        <span class="setting-label">Win Background / Text</span>
+        <div style="display: flex; gap: 4px;">
+          <input type="color" id="winBgColor" value="#5F8B2C">
+          <input type="color" id="winTextColor" value="#ffffff">
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Win Background Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="winBgOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="winBgOpacityVal">100</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Loss Background / Text</span>
+        <div style="display: flex; gap: 4px;">
+          <input type="color" id="lossBgColor" value="#BD392D">
+          <input type="color" id="lossTextColor" value="#ffffff">
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Loss Background Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="lossBgOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="lossBgOpacityVal">100</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Draw Background / Text</span>
+        <div style="display: flex; gap: 4px;">
+          <input type="color" id="drawBgColor" value="#8a8a8a">
+          <input type="color" id="drawTextColor" value="#ffffff">
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Draw Background Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="drawBgOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="drawBgOpacityVal">100</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="subgroup">
+      <div class="subgroup-title">Page Surfaces</div>
+      <div class="setting-row">
+        <span class="setting-label">Card Background (Non-playing)</span>
+        <input type="color" id="cardBgColor" value="#474747">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Card Background Opacity</span>
+        <div class="range-wrap">
+          <input type="range" id="cardBgOpacity" min="0" max="100" value="100">
+          <span class="range-val" id="cardBgOpacityVal">100</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Page Background</span>
+        <input type="color" id="pageBgColor" value="#161512">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Card Radius</span>
+        <div class="range-wrap">
+          <input type="range" id="cardRadius" min="0" max="30" value="10">
+          <span class="range-val" id="cardRadiusVal">10</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Card Border Color</span>
+        <input type="color" id="cardBorderColor" value="#000000">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Card Border Width</span>
+        <div class="range-wrap">
+          <input type="range" id="cardBorderWidth" min="0" max="6" value="0">
+          <span class="range-val" id="cardBorderWidthVal">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group tab-panel" data-tab-panel="namesTab">
+    <div class="group-title">Name Replacements</div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Replacement List</div>
+      <div class="helper-text">Match the original player name in "Last name, First name" format.</div>
+      <div id="nameOverrideList" class="replacement-list" style="margin-top: 10px;"></div>
+      <div class="actions" style="justify-content: flex-start; margin-top: 10px;">
+        <button type="button" class="action-btn small-btn" id="addNameOverride">Add Replacement</button>
+      </div>
+    </div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Import / Export</div>
+      <div class="helper-text">Export saves a JSON file. Import reads the same JSON file back in.</div>
+      <div class="actions" style="justify-content: flex-start; margin-top: 10px;">
+        <button type="button" class="action-btn small-btn" id="exportNameOverrides">Export Replacements</button>
+        <button type="button" class="action-btn small-btn" id="importNameOverrides">Import Replacements</button>
+      </div>
+      <div class="status-line" id="nameOverrideStatus"></div>
+    </div>
+  </div>
+
+  <div class="actions" style="margin-top: 20px;">
+    <button type="button" class="action-btn" id="exportAddonSettings">Export Settings</button>
+    <button type="button" class="action-btn" id="importAddonSettings">Import Settings</button>
+    <button type="button" class="action-btn is-danger" id="resetAllSettings">Reset LiMultiEval</button>
+  </div>
+
+  <div class="status-line" id="settingsTransferStatus" style="text-align: center;"></div>
+
+  <input type="file" id="importNameOverridesFile" accept=".json,application/json" hidden>
+  <input type="file" id="importAddonSettingsFile" accept=".json,application/json" hidden>
+
+  <div class="popup-footer">
+    <a href="https://github.com/d1minik" target="_blank" rel="noopener noreferrer">Created by @d1minik</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

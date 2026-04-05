@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "LiMultiEval",
+  "version": "1.0",
+  "description": "Apply LiBroadcastEditor designs to the Lichess broadcast multiboard in cinema mode.",
+  "permissions": ["storage"],
+  "host_permissions": ["*://lichess.org/broadcast/*"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://lichess.org/broadcast/*"],
+      "js": ["page-bridge.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["*://lichess.org/broadcast/*"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ]
+}

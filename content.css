@@ -1,0 +1,494 @@
+html.lme-active,
+html.lme-active body {
+  margin: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  background: var(--lme-page-bg, #161512) !important;
+}
+
+html.lme-active body {
+  color: var(--c-font, #dbd8d5) !important;
+}
+
+html.lme-active #top,
+html.lme-active .site-header,
+html.lme-active #friend_box,
+html.lme-active #network-status,
+html.lme-active .relay-tour__header,
+html.lme-active .relay-tour__nav,
+html.lme-active .relay-tour__side,
+html.lme-active .analyse__board,
+html.lme-active .analyse__controls,
+html.lme-active .analyse__tools,
+html.lme-active .analyse__underboard > :not(.study__multiboard),
+html.lme-active .study__buttons,
+html.lme-active .study__multiboard__top,
+html.lme-active .relay-admin__container,
+html.lme-active .vertical-resize,
+html.lme-active .mchat,
+html.lme-active .mchat-mod,
+html.lme-active .chat__members {
+  display: none !important;
+}
+
+html.lme-active #main-wrap,
+html.lme-active main.analyse.is-relay,
+html.lme-active .box.relay-tour {
+  max-width: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+html.lme-active .study__multiboard.lme-target {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483000 !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: var(--lme-viewport-padding, 16px) !important;
+  background: var(--lme-page-bg, #161512) !important;
+  overflow: auto !important;
+  box-sizing: border-box !important;
+}
+
+html.lme-active .study__multiboard.lme-target .now-playing {
+  display: grid !important;
+  grid-template-columns: repeat(var(--lme-columns, 6), var(--lme-card-width, 300px)) !important;
+  gap: var(--lme-grid-gap, 12px) !important;
+  align-content: start !important;
+  width: max-content !important;
+  min-width: 100% !important;
+  margin: 0 !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game {
+  display: grid !important;
+  grid-template-columns:
+    max(70px, calc(var(--lme-clock-size, 13px) * 4.8))
+    minmax(0, 1fr)
+    auto
+    minmax(0, 1fr)
+    max(70px, calc(var(--lme-clock-size, 13px) * 4.8)) !important;
+  grid-template-rows: auto auto auto !important;
+  column-gap: var(--lme-inline-gap, 8px) !important;
+  row-gap: max(2px, calc(var(--lme-player-row-gap, 7px) * 0.5)) !important;
+  width: var(--lme-card-width, 420px) !important;
+  min-width: var(--lme-card-width, 420px) !important;
+  max-width: var(--lme-card-width, 420px) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 0 max(4px, calc(var(--lme-card-padding-y, 8px) * 0.45)) 0 !important;
+  border-radius: var(--lme-card-radius, 6px) !important;
+  border: var(--lme-card-border-width, 0px) solid var(--lme-card-border-color, transparent) !important;
+  background: var(--lme-card-bg, #403a34) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  text-decoration: none !important;
+  color: inherit !important;
+  align-content: start !important;
+  align-items: center !important;
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game,
+html.lme-active .study__multiboard.lme-target .mini-game * {
+  text-shadow: none !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game.active {
+  outline: none !important;
+}
+
+html.lme-active.lme-only-playing .study__multiboard.lme-target .mini-game:not(.lme-is-playing) {
+  display: none !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game > .mini-game__player {
+  display: contents !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game > .mini-game__player:last-of-type .mini-game__user {
+  grid-column: 1 / 3 !important;
+  grid-row: 1 !important;
+  justify-self: stretch !important;
+  align-self: stretch !important;
+  padding: 6px 4px !important;
+  background: var(--lme-white-box-color, #ffffff) !important;
+  color: var(--lme-white-name-color, #000000) !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game > .mini-game__player:first-of-type .mini-game__user {
+  grid-column: 4 / 6 !important;
+  grid-row: 1 !important;
+  justify-self: stretch !important;
+  align-self: stretch !important;
+  text-align: center !important;
+  padding: 6px 4px !important;
+  background: var(--lme-black-box-color, #000000) !important;
+  color: var(--lme-black-name-color, #ffffff) !important;
+  justify-content: center !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game > .mini-game__player:last-of-type .mini-game__user .name,
+html.lme-active .study__multiboard.lme-target .mini-game > .mini-game__player:last-of-type .mini-game__user .rating {
+  color: var(--lme-white-name-color, #000000) !important;
+  font-family: var(--lme-white-name-font, inherit) !important;
+  font-weight: var(--lme-white-name-weight, bold) !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game > .mini-game__player:first-of-type .mini-game__user .name,
+html.lme-active .study__multiboard.lme-target .mini-game > .mini-game__player:first-of-type .mini-game__user .rating {
+  color: var(--lme-black-name-color, #ffffff) !important;
+  font-family: var(--lme-black-name-font, inherit) !important;
+  font-weight: var(--lme-black-name-weight, bold) !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .mini-game__user {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: var(--lme-inline-gap, 8px) !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .mini-game__flag {
+  display: inline-block !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 3px !important;
+  object-fit: cover !important;
+  order: 2 !important;
+  flex: 0 0 auto !important;
+  margin-inline-start: 2px !important;
+  opacity: var(--lme-flag-opacity, 1) !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  outline: none !important;
+  background: transparent !important;
+}
+
+html.lme-active.lme-hide-flags .study__multiboard.lme-target .mini-game .mini-game__flag {
+  display: none !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .name {
+  order: var(--lme-name-order, 1) !important;
+  display: block !important;
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-family: var(--lme-global-font, inherit) !important;
+  font-weight: inherit !important;
+  font-size: var(--lme-name-size, 14px) !important;
+  color: inherit !important;
+  line-height: 1.15 !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .utitle {
+  display: inline-flex !important;
+  align-items: center !important;
+  color: var(--lme-title-color, #e69900) !important;
+  font-weight: var(--lme-title-weight, bold) !important;
+  font-size: var(--lme-name-size, 14px) !important;
+  line-height: 1.12 !important;
+}
+
+html.lme-active.lme-hide-titles .study__multiboard.lme-target .mini-game .utitle {
+  display: none !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .rating,
+html.lme-active .study__multiboard.lme-target .mini-game .mini-game__result {
+  display: none !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .mini-game__player > .mini-game__clock {
+  display: none !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game::before,
+html.lme-active .study__multiboard.lme-target .mini-game::after {
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: var(--lme-global-font, inherit) !important;
+  font-weight: 600 !important;
+  font-size: var(--lme-clock-size, 13px) !important;
+  font-variant-numeric: tabular-nums lining-nums !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  text-shadow: none !important;
+  padding: 0 var(--lme-clock-label-padding-x, 4px) !important;
+  border-radius: var(--lme-clock-label-radius, 3px) !important;
+  border: 0 solid transparent !important;
+  box-sizing: border-box !important;
+  height: var(--lme-clock-label-height, 15px) !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game.lme-has-left-label::before {
+  content: attr(data-lme-left-label) !important;
+  display: inline-flex !important;
+  grid-column: 1 / 2 !important;
+  grid-row: 2 !important;
+  justify-self: center !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: var(--lme-white-clock-font, inherit) !important;
+  font-size: var(--lme-clock-size, 14px) !important;
+  font-weight: var(--lme-white-clock-weight, bold) !important;
+  border-radius: var(--lme-clock-label-radius, 3px) !important;
+  padding: 0 var(--lme-clock-label-padding-x, 4px) !important;
+  box-sizing: border-box !important;
+  height: var(--lme-clock-label-height, 15px) !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game.lme-left-label-clock::before {
+  background: var(--lme-white-clock-bg, #333333) !important;
+  color: var(--lme-white-clock-color, #ffffff) !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game.lme-has-right-label::after {
+  content: attr(data-lme-right-label) !important;
+  display: inline-flex !important;
+  grid-column: 5 / 6 !important;
+  grid-row: 2 !important;
+  justify-self: center !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: var(--lme-black-clock-font, inherit) !important;
+  font-size: var(--lme-clock-size, 14px) !important;
+  font-weight: var(--lme-black-clock-weight, bold) !important;
+  border-radius: var(--lme-clock-label-radius, 3px) !important;
+  padding: 0 var(--lme-clock-label-padding-x, 4px) !important;
+  box-sizing: border-box !important;
+  height: var(--lme-clock-label-height, 15px) !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game.lme-right-label-clock::after {
+  background: var(--lme-black-clock-bg, #333333) !important;
+  color: var(--lme-black-clock-color, #ffffff) !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game.lme-left-label-good::before,
+html.lme-active .study__multiboard.lme-target .mini-game.lme-right-label-good::after {
+  background: var(--lme-win-bg, #a4b35e) !important;
+  color: var(--lme-win-color, #ffffff) !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: var(--lme-clock-label-radius, 4px) !important;
+  padding: 0 !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game.lme-left-label-bad::before,
+html.lme-active .study__multiboard.lme-target .mini-game.lme-right-label-bad::after {
+  background: var(--lme-loss-bg, #d76f59) !important;
+  color: var(--lme-loss-color, #ffffff) !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: var(--lme-clock-label-radius, 4px) !important;
+  padding: 0 !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game.lme-left-label-draw::before,
+html.lme-active .study__multiboard.lme-target .mini-game.lme-right-label-draw::after {
+  background: var(--lme-draw-bg, #8a8a8a) !important;
+  color: var(--lme-draw-color, #ffffff) !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: var(--lme-clock-label-radius, 4px) !important;
+  padding: 0 !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .mini-game__clock {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+  margin-inline-start: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  font-family: var(--lme-global-font, inherit) !important;
+  font-weight: inherit !important;
+  font-size: var(--lme-clock-size, 13px) !important;
+  font-variant-numeric: tabular-nums lining-nums !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game > .mini-game__player:last-of-type .mini-game__clock {
+  color: var(--lme-white-clock-color, #ffffff) !important;
+  background: transparent !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .mini-game__player > .mini-game__clock {
+  display: none !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .cg-gauge {
+  grid-column: 2 / 5 !important;
+  grid-row: 2 !important;
+  display: block !important;
+  align-self: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: var(--lme-clock-row-height, 15px) !important;
+  margin: 0 !important;
+  padding-inline: 0 !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+}
+
+html.lme-active.lme-hide-eval-text .study__multiboard.lme-target .mini-game .lme-eval-text {
+  display: none !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .mini-game__gauge {
+  display: block !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: var(--lme-clock-row-height, 15px) !important;
+  min-height: var(--lme-clock-row-height, 15px) !important;
+  max-height: var(--lme-clock-row-height, 15px) !important;
+  margin: 0 !important;
+  border-radius: 2px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+  border: var(--lme-eval-border-width, 1px) solid var(--lme-eval-border-color, rgba(255, 255, 255, 0.18)) !important;
+  background: #f3f3f3 !important;
+  align-self: center !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .mini-game__gauge::before {
+  content: none !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .mini-game__gauge__black {
+  position: absolute !important;
+  inset-block: 0 !important;
+  inset-inline-end: 0 !important;
+  width: var(--lme-black-pct, 50%) !important;
+  height: 100% !important;
+  background: #101010 !important;
+  z-index: 1 !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .mini-game__gauge tick {
+  display: none !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .mini-game__gauge::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  width: 2px !important;
+  transform: translateX(-50%) !important;
+  background: #020202 !important;
+  z-index: 2 !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .mini-game__board {
+  position: absolute !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 100px !important;
+  height: 100px !important;
+  opacity: 0 !important;
+  z-index: -10 !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .lme-move-text {
+  grid-column: 3 / 4 !important;
+  grid-row: 1 !important;
+  display: flex !important;
+  justify-self: stretch !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: stretch !important;
+  min-width: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  background: var(--lme-last-move-bg, #333333) !important;
+  color: var(--lme-last-move-color, #ffffff) !important;
+  padding: 0 !important;
+  margin-inline: calc(var(--lme-inline-gap, 8px) * -1) !important;
+  border-radius: 0 !important;
+  font-family: var(--lme-global-font, inherit) !important;
+  font-size: var(--lme-last-move-size, 13px) !important;
+  font-weight: bold !important;
+  white-space: nowrap !important;
+  line-height: 1.1 !important;
+  box-sizing: border-box !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .lme-move-text.lme-empty {
+  display: none !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .lme-move-text__inner {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding: 0 8px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .lme-eval-text {
+  grid-column: 1 / 6 !important;
+  grid-row: 3 !important;
+  display: inline-flex !important;
+  justify-self: center !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  background: var(--lme-eval-text-bg, #2a2a2a) !important;
+  color: var(--lme-eval-text-color, #ffffff) !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
+  font-family: var(--lme-global-font, inherit) !important;
+  font-size: var(--lme-eval-text-size, 13px) !important;
+  font-weight: bold !important;
+  margin-top: var(--lme-eval-text-gap, 8px) !important;
+  white-space: nowrap !important;
+  line-height: 1.1 !important;
+  box-sizing: border-box !important;
+}
+
+html.lme-active .study__multiboard.lme-target .mini-game .lme-eval-text:empty {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  html.lme-active .study__multiboard.lme-target {
+    padding: max(10px, calc(var(--lme-viewport-padding, 16px) * 0.75)) !important;
+  }
+}
