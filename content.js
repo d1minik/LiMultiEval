@@ -55,7 +55,7 @@ const DEFAULT_SETTINGS = {
   blackClockBoldness: "bold",
   lastMoveColor: "#d1d1d1",
   lastMoveOpacity: "100",
-  lastMoveDstOnly: false,
+  lastMoveDstOnly: true,
   lastMoveBgColor: "#424242",
   lastMoveBgOpacity: "100",
   evalTextColor: "#ffffff",
