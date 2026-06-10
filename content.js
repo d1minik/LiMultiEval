@@ -56,6 +56,8 @@ const DEFAULT_SETTINGS = {
   lastMoveColor: "#d1d1d1",
   lastMoveOpacity: "100",
   lastMoveDstOnly: true,
+  evalMidLineColor: "#020202",
+  evalMidLineWidth: "2",
   lastMoveBgColor: "#424242",
   lastMoveBgOpacity: "100",
   evalTextColor: "#ffffff",
@@ -434,7 +436,9 @@ function buildResolvedStyle(settings) {
     clockRowHeight: `${Math.max(2, evalWidth)}px`,
     clockLabelHeight: `${clockLabelHeight}px`,
     clockLabelPaddingX: `${clockLabelPaddingX}px`,
-    clockLabelRadius: `${clockLabelRadius}px`
+    clockLabelRadius: `${clockLabelRadius}px`,
+    evalMidLineColor: settings.evalMidLineColor || "#020202",
+    evalMidLineWidth: `${Math.max(0, parseNumber(settings.evalMidLineWidth, 2))}px`
   };
 }
 
@@ -503,6 +507,8 @@ function applyResolvedStyle(resolvedStyle) {
   setRootVar("--lme-draw-bg", resolvedStyle.drawBgColor);
   setRootVar("--lme-draw-color", resolvedStyle.drawTextColor);
   setRootVar("--lme-eval-text-size", resolvedStyle.evalTextSize);
+  setRootVar("--lme-eval-mid-color", resolvedStyle.evalMidLineColor);
+  setRootVar("--lme-eval-mid-width", resolvedStyle.evalMidLineWidth);
 
   const root = document.documentElement;
   root.classList.toggle("lme-hide-eval-text", !resolvedStyle.showEvalText);

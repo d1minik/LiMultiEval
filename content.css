@@ -400,9 +400,9 @@ html.lme-active .study__multiboard.lme-target .mini-game .mini-game__gauge::afte
   top: 0 !important;
   bottom: 0 !important;
   left: 50% !important;
-  width: 2px !important;
+  width: var(--lme-eval-mid-width, 2px) !important;
   transform: translateX(-50%) !important;
-  background: #020202 !important;
+  background: var(--lme-eval-mid-color, #020202) !important;
   z-index: 2 !important;
 }
 

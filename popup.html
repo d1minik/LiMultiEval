@@ -40,7 +40,7 @@
 
     .tab-nav {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 6px;
       margin-bottom: 12px;
     }
@@ -410,6 +410,7 @@
   <div class="tab-nav" role="tablist" aria-label="LiMultiEval Settings Tabs">
     <button type="button" class="tab-btn active" data-tab-target="layoutTab" aria-selected="true">Cinema Layout</button>
     <button type="button" class="tab-btn" data-tab-target="designTab" aria-selected="false">Design Tweaks</button>
+    <button type="button" class="tab-btn" data-tab-target="evalTab" aria-selected="false">Eval Bar</button>
     <button type="button" class="tab-btn" data-tab-target="namesTab" aria-selected="false">Names</button>
   </div>
 
@@ -870,6 +871,25 @@
         <div class="range-wrap">
           <input type="range" id="cardBorderWidth" min="0" max="6" value="0">
           <span class="range-val" id="cardBorderWidthVal">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group tab-panel" data-tab-panel="evalTab">
+    <div class="group-title">Eval Bar</div>
+
+    <div class="subgroup">
+      <div class="subgroup-title">Middle Division Line</div>
+      <div class="setting-row">
+        <span class="setting-label">Line Color</span>
+        <input type="color" id="evalMidLineColor" value="#020202">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Line Thickness (Width)</span>
+        <div class="range-wrap">
+          <input type="range" id="evalMidLineWidth" min="0" max="10" value="2">
+          <span class="range-val" id="evalMidLineWidthVal">2</span>
         </div>
       </div>
     </div>
