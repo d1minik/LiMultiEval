@@ -74,6 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
     drawBgOpacity: "100",
     drawTextColor: "#ffffff",
     drawTextOpacity: "100",
+    lastMoveDstOnly: false,
     globalFont: "",
     customFonts: [],
     nameOverrides: []
@@ -146,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "blackClockBgColor",
     "blackClockBgOpacity",
     "lastMoveColor",
+    "lastMoveDstOnly",
     "lastMoveOpacity",
     "lastMoveBgColor",
     "lastMoveBgOpacity",

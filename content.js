@@ -55,6 +55,7 @@ const DEFAULT_SETTINGS = {
   blackClockBoldness: "bold",
   lastMoveColor: "#d1d1d1",
   lastMoveOpacity: "100",
+  lastMoveDstOnly: false,
   lastMoveBgColor: "#424242",
   lastMoveBgOpacity: "100",
   evalTextColor: "#ffffff",
@@ -654,8 +655,21 @@ function classifyMiniGames(multiboard, nameOverrideMap, options = {}) {
             else if (pieceEl.classList.contains('queen')) pChar = 'Q';
             else if (pieceEl.classList.contains('king')) pChar = 'K';
           }
-          moveText = `${pChar}${toAlgebraic(src)}-${toAlgebraic(dst)}`;
+          if (latestSettings.lastMoveDstOnly) {
+            moveText = `${pChar}${toAlgebraic(dst)}`;
+          } else {
+            moveText = `${pChar}${toAlgebraic(src)}-${toAlgebraic(dst)}`;
+          }
         }
+      }
+    }
+
+    let formattedMoveText = moveText;
+    if (moveText) {
+      const moveNum = game.dataset.lmeMoveNumber;
+      const moveColor = game.dataset.lmeMoveColor;
+      if (moveNum && (moveColor === "w" || moveColor === "b")) {
+        formattedMoveText = `${moveNum}. ${moveText}`;
       }
     }
 
@@ -671,9 +685,9 @@ function classifyMiniGames(multiboard, nameOverrideMap, options = {}) {
       moveInnerEl.className = 'lme-move-text__inner';
       moveEl.appendChild(moveInnerEl);
     }
-    moveEl.classList.toggle('lme-empty', !moveText);
-    if (moveInnerEl.textContent !== moveText) {
-      moveInnerEl.textContent = moveText;
+    moveEl.classList.toggle('lme-empty', !formattedMoveText);
+    if (moveInnerEl.textContent !== formattedMoveText) {
+      moveInnerEl.textContent = formattedMoveText;
     }
 
     let evalEl = game.querySelector('.lme-eval-text');
@@ -823,7 +837,7 @@ function bindObserver() {
     childList: true,
     subtree: true,
     attributes: true,
-    attributeFilter: ["class", "style"]
+    attributeFilter: ["class", "style", "data-lme-move-number", "data-lme-move-color"]
   });
 }
 
