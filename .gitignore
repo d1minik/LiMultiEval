@@ -1,15 +1,7 @@
 # Repository root allowlist
 /*
 !/.gitignore
-!/content.css
-!/content.js
-!/manifest.json
-!/page-bridge.js
-!/popup-icons.svg
-!/popup-ui.js
-!/popup.css
-!/popup.html
-!/popup.js
+!/extension/
 !/releases/
 
 # OS files
