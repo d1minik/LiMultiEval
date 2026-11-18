@@ -1,3 +1,5 @@
+import { initPopupView } from "./popup-ui.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   const DEFAULT_SETTINGS = {
     enabled: true,
@@ -102,119 +104,10 @@ document.addEventListener("DOMContentLoaded", () => {
     FONT_PRESETS.map((preset) => [normalizeFontStack(preset.css), preset])
   );
 
-  const CONTROL_IDS = [
-    "enabled",
-    "onlyPlaying",
-    "showEvalText",
-    "hideFlags",
-    "hideTitle",
-    "titleBoldness",
-    "titleColor",
-    "titleOpacity",
-    "cardsPerRow",
-    "cardWidthScale",
-    "viewportPadding",
-    "gridGap",
-    "playerRowGap",
-    "nameScale",
-    "evalTextScale",
-    "clockScale",
-    "lastMoveScale",
-    "evalBarWidth",
-    "evalBarBorderWidth",
-    "evalBarBorderColor",
-    "evalBarBorderOpacity",
-    "evalTextGap",
-    "titleOpacity",
-    "flagOpacity",
-    "globalFont",
-    "whiteNameBoldness",
-    "whiteNameColor",
-    "whiteNameOpacity",
-    "whiteBoxColor",
-    "whiteBoxOpacity",
-    "blackNameBoldness",
-    "blackNameColor",
-    "blackNameOpacity",
-    "blackBoxColor",
-    "blackBoxOpacity",
-    "whiteClockBoldness",
-    "whiteClockColor",
-    "whiteClockOpacity",
-    "whiteClockBgColor",
-    "whiteClockBgOpacity",
-    "blackClockBoldness",
-    "blackClockColor",
-    "blackClockOpacity",
-    "blackClockBgColor",
-    "blackClockBgOpacity",
-    "lastMoveColor",
-    "lastMoveDstOnly",
-    "lastMoveOpacity",
-    "lastMoveBgColor",
-    "lastMoveBgOpacity",
-    "evalMidLineColor",
-    "evalMidLineWidth",
-    "evalTextColor",
-    "evalTextOpacity",
-    "evalTextBgColor",
-    "evalTextBgOpacity",
-    "cardRadius",
-    "cardBorderWidth",
-    "cardBorderColor",
-    "pageBgColor",
-    "cardBgColor",
-    "cardBgOpacity",
-    "winBgColor",
-    "winBgOpacity",
-    "winTextColor",
-    "lossBgColor",
-    "lossBgOpacity",
-    "lossTextColor",
-    "drawBgColor",
-    "drawBgOpacity",
-    "drawTextColor"
-  ];
-
-  const RANGE_INPUT_IDS = [
-    "cardsPerRow",
-    "cardWidthScale",
-    "viewportPadding",
-    "gridGap",
-    "playerRowGap",
-    "nameScale",
-    "evalTextScale",
-    "clockScale",
-    "lastMoveScale",
-    "evalBarWidth",
-    "evalBarBorderWidth",
-    "evalBarBorderOpacity",
-    "evalTextGap",
-    "flagOpacity",
-    "cardBgOpacity",
-    "whiteNameOpacity",
-    "whiteBoxOpacity",
-    "blackNameOpacity",
-    "blackBoxOpacity",
-    "whiteClockOpacity",
-    "whiteClockBgOpacity",
-    "blackClockOpacity",
-    "blackClockBgOpacity",
-    "lastMoveOpacity",
-    "lastMoveBgOpacity",
-    "evalMidLineWidth",
-    "evalTextOpacity",
-    "evalTextBgOpacity",
-    "winBgOpacity",
-    "lossBgOpacity",
-    "drawBgOpacity",
-    "cardRadius",
-    "cardBorderWidth"
-  ];
-
   const elements = Object.fromEntries(
-    CONTROL_IDS.map((id) => [id, document.getElementById(id)])
+    [...document.querySelectorAll("[data-setting]")].map((input) => [input.id, input])
   );
+  const { refreshView, commitDrafts } = initPopupView(elements, resolveFontCssValue);
 
   const ui = {
     customGlobalFont: document.getElementById("customGlobalFont"),
@@ -236,16 +129,18 @@ document.addEventListener("DOMContentLoaded", () => {
     label: option.textContent || option.value
   }));
 
-  const rangeValueMap = Object.fromEntries(
-    RANGE_INPUT_IDS.map((id) => [id, document.getElementById(`${id}Val`)])
-  );
-
-  const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
-  const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
+  const content = document.getElementById("settingsContent");
+  const search = document.getElementById("settingSearch");
+  const saveStatus = document.getElementById("saveStatus");
+  const saveMessage = document.getElementById("saveMessage");
+  const retryStorage = document.getElementById("retryStorage");
+  const resetDialog = document.getElementById("resetDialog");
   const resetAllSettingsButton = document.getElementById("resetAllSettings");
 
   let state = mergeStoredSettings(DEFAULT_SETTINGS);
-  let persistTimer = 0;
+  let persistTimer;
+  let pendingWrite;
+  let revision = 0;
 
   function stripMatchingQuotes(value) {
     const trimmed = String(value || "").trim();
@@ -355,78 +250,63 @@ document.addEventListener("DOMContentLoaded", () => {
     return merged;
   }
 
-  function updateSliderLabels() {
-    Object.entries(rangeValueMap).forEach(([key, label]) => {
-      if (!elements[key] || !label) return;
-      label.textContent = String(elements[key].value);
-    });
-  }
-
   function collectFixedSettingsFromUi() {
     const settings = {};
 
     Object.entries(elements).forEach(([key, element]) => {
-      if (!element) return;
-      settings[key] =
-        element.type === "checkbox" ? Boolean(element.checked) : String(element.value);
+      if (element.type === "checkbox") {
+        settings[key] = element.checked !== element.hasAttribute("data-inverted");
+      } else {
+        settings[key] = element.value;
+      }
     });
 
     return settings;
   }
 
-  function openTab(target) {
-    tabButtons.forEach((button) => {
-      const isActive = button.dataset.tabTarget === target;
-      button.classList.toggle("active", isActive);
-      button.setAttribute("aria-selected", isActive ? "true" : "false");
-    });
-
-    tabPanels.forEach((panel) => {
-      panel.classList.toggle("active", panel.dataset.tabPanel === target);
-    });
+  function setSaveStatus(status, message) {
+    saveStatus.dataset.state = status;
+    if (saveMessage.textContent !== message) saveMessage.textContent = message;
+    retryStorage.hidden = status !== "error";
   }
 
   function notifyActiveTab(settings) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (!tabs.length || typeof tabs[0].id !== "number") return;
+      if (chrome.runtime.lastError || typeof tabs?.[0]?.id !== "number" || settings !== state) return;
       chrome.tabs.sendMessage(tabs[0].id, { action: "updateStyles", settings }, () => {
         void chrome.runtime.lastError;
       });
     });
   }
 
-  function persistState() {
-    chrome.storage.sync.set(state, () => {
-      void chrome.runtime.lastError;
-    });
-  }
-
   function scheduleStatePersist() {
-    if (persistTimer) {
-      window.clearTimeout(persistTimer);
-    }
-
-    persistTimer = window.setTimeout(() => {
-      persistTimer = 0;
-      persistState();
-    }, 150);
+    pendingWrite = { settings: state, revision: ++revision };
+    clearTimeout(persistTimer);
+    setSaveStatus("saving", "Saving…");
+    persistTimer = setTimeout(flushStatePersist, 150);
   }
 
   function flushStatePersist() {
-    if (persistTimer) {
-      window.clearTimeout(persistTimer);
-      persistTimer = 0;
-    }
+    clearTimeout(persistTimer);
+    if (!pendingWrite) return;
 
-    persistState();
+    const write = pendingWrite;
+    pendingWrite = null;
+    chrome.storage.sync.set(write.settings, () => {
+      const error = chrome.runtime.lastError;
+      if (write.revision !== revision) return;
+      if (error) {
+        pendingWrite = write;
+        setSaveStatus("error", "Could not save settings");
+      } else {
+        setSaveStatus("ready", "Changes saved");
+      }
+    });
   }
 
-  function setStatus(element, message, tone = "") {
+  function setStatus(element, message, tone) {
     element.textContent = message;
-    element.className = "status-line";
-    if (tone) {
-      element.classList.add(`is-${tone}`);
-    }
+    element.classList.toggle("is-error", tone === "error");
   }
 
   function setNameOverrideStatus(message, tone = "") {
@@ -499,28 +379,29 @@ document.addEventListener("DOMContentLoaded", () => {
     sourceInput.placeholder = "Last name, First name";
     sourceInput.value = entry.source || "";
     sourceInput.dataset.field = "source";
+    sourceInput.autocomplete = "off";
+    const sourceLabel = document.createElement("label");
+    sourceLabel.append("Original name", sourceInput);
 
     const targetInput = document.createElement("input");
     targetInput.type = "text";
     targetInput.placeholder = "Display text";
     targetInput.value = entry.target || "";
     targetInput.dataset.field = "target";
+    targetInput.autocomplete = "off";
+    const targetLabel = document.createElement("label");
+    targetLabel.append("Display name", targetInput);
 
-    inputs.appendChild(sourceInput);
-    inputs.appendChild(targetInput);
-
-    const rowActions = document.createElement("div");
-    rowActions.className = "replacement-row-actions";
+    inputs.append(sourceLabel, targetLabel);
 
     const removeButton = document.createElement("button");
     removeButton.type = "button";
-    removeButton.className = "action-btn small-btn";
+    removeButton.className = "secondary-button";
     removeButton.dataset.action = "remove-name-override";
     removeButton.textContent = "Remove";
+    removeButton.setAttribute("aria-label", `Remove replacement ${index + 1}`);
 
-    rowActions.appendChild(removeButton);
-    item.appendChild(inputs);
-    item.appendChild(rowActions);
+    item.append(inputs, removeButton);
 
     return item;
   }
@@ -529,8 +410,8 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.nameOverrideList.innerHTML = "";
 
     if (!state.nameOverrides.length) {
-      const emptyState = document.createElement("div");
-      emptyState.className = "empty-state";
+      const emptyState = document.createElement("p");
+      emptyState.className = "group-hint";
       emptyState.textContent = "No replacements yet.";
       ui.nameOverrideList.appendChild(emptyState);
       return;
@@ -547,20 +428,9 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  function saveAndNotify(options = {}) {
-    const { rebuildFonts = false } = options;
-
-    state = mergeStoredSettings({
-      ...state,
-      ...collectFixedSettingsFromUi(),
-      customFonts: state.customFonts,
-      nameOverrides: state.nameOverrides
-    });
-
-    if (rebuildFonts) {
-      rebuildGlobalFontOptions(state.globalFont);
-    }
-
+  function saveAndNotify() {
+    state = mergeStoredSettings({ ...state, ...collectFixedSettingsFromUi() });
+    refreshView();
     notifyActiveTab(state);
     scheduleStatePersist();
   }
@@ -569,9 +439,8 @@ document.addEventListener("DOMContentLoaded", () => {
     state = mergeStoredSettings(settings);
 
     Object.entries(elements).forEach(([key, element]) => {
-      if (!element || !(key in state)) return;
       if (element.type === "checkbox") {
-        element.checked = Boolean(state[key]);
+        element.checked = Boolean(state[key]) !== element.hasAttribute("data-inverted");
       } else {
         element.value = String(state[key]);
       }
@@ -579,7 +448,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     rebuildGlobalFontOptions(state.globalFont);
     renderNameOverrides();
-    updateSliderLabels();
+    refreshView(true);
   }
 
   function findBuiltInFontValue(rawValue) {
@@ -616,7 +485,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     applySettingsToUi(state);
-    saveAndNotify({ rebuildFonts: true });
+    saveAndNotify();
   }
 
   function parseImportedNameOverrides(rawText) {
@@ -646,7 +515,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const parsed = JSON.parse(trimmed);
-    const payload = parsed?.settings && typeof parsed.settings === "object" ? parsed.settings : parsed;
+    const payload = parsed?.settings ?? parsed;
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+      throw new Error("Expected a LiMultiEval settings object.");
+    }
     return mergeStoredSettings(payload);
   }
 
@@ -673,28 +545,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function bindFixedControls() {
     Object.entries(elements).forEach(([key, input]) => {
-      if (!input) return;
       const eventName = input.type === "range" ? "input" : "change";
 
       input.addEventListener(eventName, () => {
-        updateSliderLabels();
-
-        if (key === "globalFont") {
-          state = mergeStoredSettings({
-            ...state,
-            globalFont: String(input.value)
-          });
-          syncCustomFontInput();
-        }
-
         saveAndNotify();
+        if (key === "globalFont") syncCustomFontInput();
       });
 
-      if (input.type === "color") {
-        input.addEventListener("input", () => {
-          saveAndNotify();
-        });
-      }
+      if (input.type === "color") input.addEventListener("input", saveAndNotify);
     });
   }
 
@@ -767,6 +625,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       renderNameOverrides();
       saveAndNotify();
+      const nextRemove = ui.nameOverrideList.querySelector(
+        `.replacement-item[data-index="${index}"] [data-action="remove-name-override"]`
+      );
+      (nextRemove || ui.addNameOverride).focus();
     });
 
     ui.exportNameOverrides.addEventListener("click", () => {
@@ -828,7 +690,7 @@ document.addEventListener("DOMContentLoaded", () => {
           await readTextFromFileInput(ui.importAddonSettingsFile)
         );
         applySettingsToUi(importedSettings);
-        saveAndNotify({ rebuildFonts: true });
+        saveAndNotify();
         setSettingsStatus("Settings file imported.", "success");
       } catch (error) {
         setSettingsStatus(
@@ -837,28 +699,55 @@ document.addEventListener("DOMContentLoaded", () => {
         );
       }
     });
-
   }
 
   bindFixedControls();
   bindDynamicControls();
-  window.addEventListener("pagehide", flushStatePersist);
 
-  tabButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      openTab(button.dataset.tabTarget || "layoutTab");
-    });
+  function flushPopupEdits() {
+    commitDrafts();
+    flushStatePersist();
+  }
+
+  window.addEventListener("pagehide", flushPopupEdits);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) flushPopupEdits();
   });
 
   resetAllSettingsButton.addEventListener("click", () => {
-    state = mergeStoredSettings(DEFAULT_SETTINGS);
-    applySettingsToUi(state);
+    resetDialog.returnValue = "";
+    resetDialog.showModal();
+  });
+  resetDialog.addEventListener("close", () => {
+    if (resetDialog.returnValue !== "reset") return;
+    applySettingsToUi(DEFAULT_SETTINGS);
     setNameOverrideStatus("");
     setSettingsStatus("");
-    saveAndNotify({ rebuildFonts: true });
+    saveAndNotify();
   });
 
-  chrome.storage.sync.get(DEFAULT_SETTINGS, (stored) => {
-    applySettingsToUi(mergeStoredSettings(stored));
+  function loadStoredSettings() {
+    setSaveStatus("loading", "Loading settings…");
+    const keys = [...Object.keys(DEFAULT_SETTINGS), "showEvalBar"];
+    chrome.storage.sync.get(keys, (stored) => {
+      if (chrome.runtime.lastError) {
+        setSaveStatus("error", "Could not load saved settings");
+        return;
+      }
+      applySettingsToUi(stored);
+      setSaveStatus("ready", "Saves automatically");
+      content.inert = false;
+      search.disabled = false;
+    });
+  }
+
+  retryStorage.addEventListener("click", () => {
+    if (content.inert) {
+      loadStoredSettings();
+    } else {
+      setSaveStatus("saving", "Saving…");
+      flushStatePersist();
+    }
   });
+  loadStoredSettings();
 });
